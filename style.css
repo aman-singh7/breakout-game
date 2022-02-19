@@ -1,9 +1,12 @@
 .grid{
     position: absolute;
-    width: 560px;
-    height: 300px;
-    border: solid black 1px;
-    margin-top: 100px;
+    width: 675px;
+    height: 400px;
+    border-top: solid black 40px;
+    border-left: solid black 10px;
+    border-right: solid black 10px;
+    margin-top: 160px;
+    margin-left: 150px;
 }
 
 .block{
@@ -30,4 +33,94 @@
 
 #name{
     font-size: 20;
+}
+
+#breakout {
+    position: relative;
+    background-color: azure;
+}
+
+#levels {
+    position: absolute;
+        left: 10px;
+         top: 10px;
+       color: #666;
+ line-height: 20px;
+}
+
+#levels #next  { 
+    position: absolute;
+}
+
+#levels #prev  { 
+    position: absolute; top: 14px;
+}
+
+#levels #label { 
+    padding-left: 20px;
+}
+#levels #level { 
+    font-size: 14pt; padding-left: 5px; font-weight: bold; color: black;
+}
+
+#levels img                 { cursor: pointer; }
+#levels img.disabled        { opacity: 0.3; cursor: default; }
+#levels img:active          { margin-top: 1px; margin-left: 1px; }
+#levels img.disabled:active { margin-top: 0; margin-left: 0; }
+
+#score {
+    position: absolute;
+    left: 50px;
+    top: 10px;
+    color: #666;
+    line-height: 20px;
+}
+
+#score #label { 
+    padding-left: 40px;
+}
+#score #value { 
+    font-size: 14pt; padding-left: 5px; font-weight: bold; color: black;
+}
+
+#highscore {
+    position: absolute;
+    right: 30px;
+    top: 10px;
+    color: #666;
+    line-height: 20px;
+}
+
+#highscore #label { 
+    padding-left: 40px;
+}
+#highscore #value { 
+    font-size: 14pt; padding-left: 5px; font-weight: bold; color: black;
+}
+
+#verdict {
+    position: absolute;
+    color: black;
+    top: 100px;
+    margin-left: 400px;
+}
+
+#verdict #message {
+    font-size: 24pt; padding-left: 15px; font-weight: bold; color: black;
+}
+
+
+@media screen and (min-width: 0px) {
+    #breakout     { display: block; width: 640px; height: 480px; margin: 1em auto; border: 1px solid #AAA; }
+    #canvas       { display: block; width: 640px; height: 480px; }
+}
+  
+@media screen and (min-width: 1200px) {
+    #breakout     { width: 800px; height: 600px; }
+    #canvas       { width: 800px; height: 600px; }
+}
+  
+@media screen and (min-width: 1600px) {
+    #breakout     { width: 1024px; height: 768px; }
+    #canvas       { width: 1024px; height: 768px; }
 }

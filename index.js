@@ -1,15 +1,13 @@
-const userName = prompt('Enter your name')
-
 const grid = document.querySelector('.grid')
-const scoreDisplay = document.querySelector('#score')
-const nameDisplay = document.querySelector('#name')
-nameDisplay.innerHTML = `Welcome ${userName}!`
+const currScore = document.querySelector('#score #value')
+const highScore = document.querySelector('#highscore #value')
+const verdict = document.querySelector('#verdict #message')
 const blockHeight = 20
 const blockWidth = 100
-const boardWidth = 560
-const boardHeight = 300
+const boardWidth = 675
+const boardHeight = 400
 const ballDiameter = 20
-const columnsCount = 5
+const columnsCount = 6
 const rowsCount = 3
 let timerId
 let xDirection = 2
@@ -129,11 +127,12 @@ function checkForCollisions() {
             blocks.splice(i,1)
             changeDirection()
             score++
-            scoreDisplay.innerHTML = `Score:\t${score}`
+            currScore.innerHTML = score
+            highScore.innerHTML = Math.max(highScore.innerHTML, score)
 
             //check for win
             if (blocks.length == 0){
-                scoreDisplay.innerHTML = 'You Win'
+                verdict.innerHTML = 'You Won'
                 clearInterval(timerId)
                 document.removeEventListener('keydown', moveBoard)
             }
@@ -160,7 +159,7 @@ function checkForCollisions() {
     // check for game over
     if(ballCurrentPosition[1] <= 0){
         clearInterval(timerId)
-        scoreDisplay.innerHTML = 'You lose'
+        verdict.innerHTML = 'You lose'
         document.removeEventListener('keydown', moveBoard)
     }
 }

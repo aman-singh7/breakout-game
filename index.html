@@ -6,9 +6,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="name"></div>
-    <div id="score">Score:  0</div>
-    <div class="grid"></div>
+    <div id="breakout">
+        <div id="levels">
+            <img id="next" class="disabled" src="images/up.png"   title="next level">
+            <img id="prev" class="disabled" src="images/down.png" title="previous level">
+            <span id="label">level:</span><span id="level">1</span>
+        </div>
+        <div id="score">
+            <span id="label">Score:</span><span id="value">0</span>
+        </div>
+        <div id="highscore">
+            <span id="label">High Score:</span><span id="value">0</span>
+        </div>
+        <div id="verdict">
+            <span id="message"></span>
+        </div>
+        <div class="grid"></div>
+    </div>
     <script src="index.js"></script>
 </body>
 </html>
