@@ -2,40 +2,57 @@ const grid = document.querySelector('.grid')
 const currScore = document.querySelector('#score #value')
 const highScore = document.querySelector('#highscore #value')
 const verdict = document.querySelector('#verdict #message')
+
 const blockHeight = 20
 const blockWidth = 100
-const boardWidth = 675
+const boardWidth = 670
 const boardHeight = 400
-const ballDiameter = 20
 const columnsCount = 6
 const rowsCount = 3
 let timerId
-let xDirection = 2
-let yDirection = 2
 let score = 0
 
-const boardStart = [230, 10]
-let currentPosition = boardStart
-
-const ballStart = [230, 30]
-let ballCurrentPosition = ballStart
-
 // Board
-const board = document.createElement('div')
-board.classList.add('user')
-grid.appendChild(board)
+const paddleElement = document.createElement('div')
+paddleElement.classList.add('paddle')
+grid.appendChild(paddleElement)
+
+let paddle = {
+    x: 230,
+    y: 10,
+}
 
 // Ball
-const ball = document.createElement('div')
-ball.classList.add('ball')
-grid.appendChild(ball)
+const ballElement = document.createElement('div')
+ballElement.classList.add('ball')
+grid.appendChild(ballElement)
+
+let ball = {
+    x: 230,
+    y: 30,
+    radius: 10,
+    dx: 4,
+    dy: 4,
+}
 
 class Block{
     constructor(xAxis, yAxis){
-        this.bottomLeft = [xAxis, yAxis]
-        this.bottomRight = [xAxis+blockWidth, yAxis]
-        this.topLeft = [xAxis, yAxis+blockHeight]
-        this.topRight = [xAxis+blockWidth, yAxis+blockHeight]
+        this.bottomLeft = {
+            x: xAxis,
+            y: yAxis
+        }
+        this.bottomRight = {
+            x: xAxis +  blockWidth,
+            y: yAxis
+        }
+        this.topLeft = {
+            x: xAxis,
+            y: yAxis + blockHeight
+        }
+        this.topRight = {
+            x: xAxis + blockWidth,
+            y: yAxis + blockHeight
+        }
     }
 }
 
@@ -57,34 +74,34 @@ function addBlocks() {
     for(let i=0;i<blocks.length;i++){
         const block = document.createElement('div')
         block.classList.add('block')
-        block.style.left = blocks[i].bottomLeft[0] + 'px'
-        block.style.bottom = blocks[i].bottomLeft[1] + 'px'
+        block.style.left = blocks[i].bottomLeft.x + 'px'
+        block.style.bottom = blocks[i].bottomLeft.y + 'px'
         grid.appendChild(block)
     }
 }
 
 
 function drawBoard() {
-    board.style.left = currentPosition[0] + 'px'
-    board.style.bottom = currentPosition[1] + 'px'
+    paddleElement.style.left = paddle.x + 'px'
+    paddleElement.style.bottom = paddle.y + 'px'
 }
 
 function drawBall() {
-    ball.style.left = ballCurrentPosition[0] + 'px'
-    ball.style.bottom = ballCurrentPosition[1] + 'px'
+    ballElement.style.left = ball.x + 'px'
+    ballElement.style.bottom = ball.y + 'px'
 }
 
 function moveBoard(e) {
     switch(e.key){
         case 'ArrowLeft':
-            if(currentPosition[0] > 0){
-                currentPosition[0] -= 10
+            if(paddle.x > 0){
+                paddle.x -= 10
                 drawBoard()
             }
             break;
         case 'ArrowRight':
-            if(currentPosition[0] < (boardWidth-blockWidth)){
-                currentPosition[0] += 10
+            if(paddle.x < (boardWidth-blockWidth)){
+                paddle.x += 10
                 drawBoard();
             }
             break;
@@ -92,35 +109,18 @@ function moveBoard(e) {
 }
 
 function moveBall() {
-    ballCurrentPosition[0] += xDirection
-    ballCurrentPosition[1] += yDirection
+    ball.x += ball.dx
+    ball.y += ball.dy
     drawBall()
     checkForCollisions()
-}
-
-function ballWallCollision() {
-
-}
-
-function ballBoardCollision() {
-    let collisionPoint = ballCurrentPosition[0] - (currentPosition[0] + boardWidth/2)
-
-    collisionPoint = collisionPoint / (boardWidth/2)
-
-    let angle = collisionPoint* Math.PI/3
-    console.log(angle)
-
-    xDirection = 2*Math.sin(angle)
-    yDirection = -2*Math.cos(angle)
-
 }
 
 function checkForCollisions() {
     //check for block collisions
     for(let i=0;i<blocks.length;i++){
         if(
-            (ballCurrentPosition[0]>blocks[i].bottomLeft[0] && ballCurrentPosition[0] < blocks[i].bottomRight[0]) &&
-            ((ballCurrentPosition[1] + ballDiameter) > blocks[i].bottomLeft[1] && ballCurrentPosition[1] < blocks[i].topLeft[1])
+            (ball.x>blocks[i].bottomLeft.x && ball.x < blocks[i].bottomRight.x) &&
+            ((ball.y + 2*ball.radius) > blocks[i].bottomLeft.y && ball.y < blocks[i].topLeft.y)
         ){
             const allBlocks = Array.from(document.querySelectorAll('.block'))
             allBlocks[i].classList.remove('block')
@@ -140,24 +140,24 @@ function checkForCollisions() {
     }
     
     //check for wall collisions
-    if(ballCurrentPosition[0] >= (boardWidth - ballDiameter) || 
-    ballCurrentPosition[1] >= (boardHeight - ballDiameter)||
-    ballCurrentPosition[0] <=0
+    if(ball.x >= (boardWidth - 2*ball.radius) || 
+    ball.y >= (boardHeight - 2*ball.radius)||
+    ball.x <=0
     ){
         changeDirection()
     }
 
     //check for board collision
     if(
-        (ballCurrentPosition[0] > currentPosition[0] && ballCurrentPosition[0] < currentPosition[0] + blockWidth) &&
-        (ballCurrentPosition[1] > currentPosition[1] && ballCurrentPosition[1] < currentPosition[1] + blockHeight)
+        (ball.x > paddle.x && ball.x < paddle.x + blockWidth) &&
+        (ball.y > paddle.y && ball.y < paddle.y + blockHeight)
     ){
         // ballBoardCollision() 
         changeDirection()
     }
 
     // check for game over
-    if(ballCurrentPosition[1] <= 0){
+    if(ball.y <= 0){
         clearInterval(timerId)
         verdict.innerHTML = 'You lose'
         document.removeEventListener('keydown', moveBoard)
@@ -167,20 +167,20 @@ function checkForCollisions() {
 
 
 function changeDirection() {
-    if(xDirection === 2 && yDirection === 2){
-        yDirection = -2
+    if(ball.dx === 4 && ball.dy === 4){
+        ball.dy = -4
         return
     }
-    if(xDirection === 2 && yDirection === -2){
-        xDirection = -2
+    if(ball.dx === 4 && ball.dy === -4){
+        ball.dx = -4
         return
     }
-    if(xDirection == -2 && yDirection === -2){
-        yDirection = 2
+    if(ball.dx == -4 && ball.dy === -4){
+        ball.dy = 4
         return
     }
-    if(xDirection === -2 && yDirection === 2){
-        xDirection = 2
+    if(ball.dx === -4 && ball.dy === 4){
+        ball.dx = 4
         return
     }
 }
