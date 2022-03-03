@@ -2,10 +2,11 @@ const grid = document.querySelector('.grid')
 const currScore = document.querySelector('#score #value')
 const highScore = document.querySelector('#highscore #value')
 const verdict = document.querySelector('#verdict #message')
+const coordinate = document.querySelector('#coordinate')
 
 const blockHeight = 20
 const blockWidth = 100
-const boardWidth = 670
+const boardWidth = 675
 const boardHeight = 400
 const columnsCount = 6
 const rowsCount = 3
@@ -20,6 +21,8 @@ grid.appendChild(paddleElement)
 let paddle = {
     x: 230,
     y: 10,
+    width: 100,
+    height: 20,
 }
 
 // Ball
@@ -112,20 +115,66 @@ function moveBall() {
     ball.x += ball.dx
     ball.y += ball.dy
     drawBall()
-    checkForCollisions()
+    detectCollision()
+    detectBrickCollision()
 }
 
-function checkForCollisions() {
-    //check for block collisions
-    for(let i=0;i<blocks.length;i++){
-        if(
-            (ball.x>blocks[i].bottomLeft.x && ball.x < blocks[i].bottomRight.x) &&
-            ((ball.y + 2*ball.radius) > blocks[i].bottomLeft.y && ball.y < blocks[i].topLeft.y)
-        ){
+function detectCollision() {
+    const hitTop = () => ball.y > boardHeight - 2 * ball.radius;
+    const hitBottom = () => ball.y < 0;
+    const hitLeftWall = () => ball.x < 0;
+    const hitRightWall = () => ball.x + ball.radius * 2 > boardWidth;
+    const hitPaddle = () =>
+        ball.x > paddle.x && 
+        ball.x < paddle.x + paddle.width &&
+        ball.y > paddle.y && 
+        ball.y < paddle.y + paddle.height;
+
+    if (hitLeftWall()) {
+        ball.dx = -ball.dx;
+        ball.x = 0;
+    }        
+    if (hitRightWall()) {
+        ball.dx = -ball.dx;
+        ball.x = boardWidth - 2 * ball.radius;
+    }
+    if (hitTop()) {
+        ball.dy = -ball.dy;
+    }
+    if (hitBottom()) {
+        clearInterval(timerId)
+        verdict.innerHTML = 'You lose'
+        document.removeEventListener('keydown', moveBoard)
+    }
+
+    if (hitPaddle()) {
+        ball.dy = -ball.dy;
+        const drawingConst = 5
+        const paddleMiddle = 2;
+        const algo = (((ball.x - paddle.x) / paddle.width) * drawingConst) | 0;
+        ball.dx = ball.dx + algo - paddleMiddle;
+    }
+}
+
+function detectBrickCollision() {
+    let index = 0;
+    let directionChanged = false;
+    const isBallCollide = (block) =>
+        ball.x > block.bottomLeft.x &&
+        ball.x < block.bottomRight.x &&
+        ball.y + 2*ball.radius > block.bottomLeft.y &&
+        ball.y < block.topLeft.y
+
+    blocks.forEach((block) => {
+        if(isBallCollide(block)){
             const allBlocks = Array.from(document.querySelectorAll('.block'))
-            allBlocks[i].classList.remove('block')
-            blocks.splice(i,1)
-            changeDirection()
+            
+            allBlocks[index].classList.remove('block')
+            blocks.splice(index,1)
+            if (!directionChanged) {
+                directionChanged = true;
+                detectCollisionDirection(block);
+            }
             score++
             currScore.innerHTML = score
             highScore.innerHTML = Math.max(highScore.innerHTML, score)
@@ -137,51 +186,18 @@ function checkForCollisions() {
                 document.removeEventListener('keydown', moveBoard)
             }
         }
-    }
-    
-    //check for wall collisions
-    if(ball.x >= (boardWidth - 2*ball.radius) || 
-    ball.y >= (boardHeight - 2*ball.radius)||
-    ball.x <=0
-    ){
-        changeDirection()
-    }
-
-    //check for board collision
-    if(
-        (ball.x > paddle.x && ball.x < paddle.x + blockWidth) &&
-        (ball.y > paddle.y && ball.y < paddle.y + blockHeight)
-    ){
-        // ballBoardCollision() 
-        changeDirection()
-    }
-
-    // check for game over
-    if(ball.y <= 0){
-        clearInterval(timerId)
-        verdict.innerHTML = 'You lose'
-        document.removeEventListener('keydown', moveBoard)
-    }
+        index++;
+    });
 }
 
+function detectCollisionDirection(brick) {
+    const hitFromLeft = () => ball.x + 2 * ball.radius - ball.dx <= brick.bottomLeft.x;
+    const hitFromRight = () => ball.x - ball.dx >= brick.bottomRight.x;
 
-
-function changeDirection() {
-    if(ball.dx === 4 && ball.dy === 4){
-        ball.dy = -4
-        return
-    }
-    if(ball.dx === 4 && ball.dy === -4){
-        ball.dx = -4
-        return
-    }
-    if(ball.dx == -4 && ball.dy === -4){
-        ball.dy = 4
-        return
-    }
-    if(ball.dx === -4 && ball.dy === 4){
-        ball.dx = 4
-        return
+    if (hitFromLeft() || hitFromRight()) {
+      ball.dx = -ball.dx;
+    } else { // Hit from above or below
+      ball.dy = -ball.dy;
     }
 }
 
